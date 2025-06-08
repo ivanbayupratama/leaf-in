@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyek.leaf_in.R
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun RegisterScreen(
@@ -160,15 +161,25 @@ fun RegisterScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
                     .height(50.dp),
-                shape = MaterialTheme.shapes.medium
+                // --- PERUBAHAN UTAMA DI SINI ---
+                shape = RoundedCornerShape(50.dp), // Membuat bentuk oval penuh
+                colors = ButtonDefaults.buttonColors( // Mengatur warna tombol
+                    containerColor = Color(0xFF89D133), // Latar belakang hijau cerah
+                    contentColor = Color.Black // Warna teks hitam
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp) // Menghilangkan bayangan
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color.Black // Warna progress indicator hitam agar kontras
                     )
                 } else {
-                    Text(text = stringResource(id = R.string.register), fontSize = 18.sp)
+                    Text(
+                        text = stringResource(id = R.string.register),
+                        fontSize = 20.sp, // Ukuran font lebih besar
+                        fontWeight = FontWeight.Bold, // Teks lebih tebal
+                    )
                 }
             }
         }
@@ -183,3 +194,4 @@ fun RegisterScreenPreview() {
     RegisterScreen(onRegistrationSuccess = {})
     // }
 }
+ini yg sebelumnya cb benerin yg hrs diganti

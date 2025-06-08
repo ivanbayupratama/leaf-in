@@ -12,3 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val DarkGreen = Color(0xFF173006)
 val LeafGreen = Color(0xFF89D133)
+
+val DarkGrayOutline = Color(0xFFA9A9A9) // Border dan label saat focused (contoh warna abu-abu gelap)
+val LightGrayOutline = Color(0xFFD3D3D3) // Border dan label saat unfocused (contoh warna abu-abu terang)
