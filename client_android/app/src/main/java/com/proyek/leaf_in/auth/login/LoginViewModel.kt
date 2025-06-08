@@ -35,12 +35,27 @@ class LoginViewModel : ViewModel() {
      * Dipanggil saat tombol Login diklik.
      * TODO: Tambahkan logika login di sini.
      */
+    // Di dalam kelas LoginViewModel Anda
+
     fun onLoginClick() {
-        // Contoh logika:
-        val currentEmail = _uiState.value.email
-        val currentPassword = _uiState.value.password
-        println("Login attempt with Email: $currentEmail and Password: $currentPassword")
-        // Di sini kamu bisa memanggil repository atau use case untuk proses login.
+        // ...
+        // Misalkan Anda melakukan validasi atau memanggil repository di sini
+        // ...
+
+        // --- KETIKA PROSES LOGIN BERHASIL ---
+        // (misalnya setelah mendapat respons sukses dari API/Firebase)
+        // Update state untuk menandakan login sukses
+        _uiState.update { currentState ->
+            currentState.copy(
+                isLoginSuccess = true // <-- UBAH STATE DI SINI
+            )
+        }
+
+        // --- JIKA GAGAL ---
+        // Anda bisa meng-update state error
+        // _uiState.update { currentState ->
+        //     currentState.copy(loginError = "Email atau password salah")
+        // }
     }
 
     /**

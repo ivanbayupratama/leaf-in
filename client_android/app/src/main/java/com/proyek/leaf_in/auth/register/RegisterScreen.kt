@@ -2,7 +2,6 @@ package com.proyek.leaf_in.auth.register
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,46 +15,47 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyek.leaf_in.R
-import androidx.compose.ui.text.font.FontWeight
+import com.proyek.leaf_in.ui.theme.DarkGreen // Pastikan Anda punya warna ini
 
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = viewModel(),
-    onRegistrationSuccess: () -> Unit // Callback untuk navigasi setelah sukses
+    onRegistrationSuccess: () -> Unit,
+    onNavigateBackToLogin: () -> Unit // <-- UBAHAN 1: Parameter baru
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Menangani side-effects: Tampilkan pesan error & navigasi
     LaunchedEffect(key1 = uiState.registrationError, key2 = uiState.isRegistrationSuccess) {
         if (uiState.registrationError != null) {
             Toast.makeText(context, uiState.registrationError, Toast.LENGTH_SHORT).show()
-            viewModel.errorShown() // Reset error state setelah ditampilkan
+            viewModel.errorShown()
         }
         if (uiState.isRegistrationSuccess) {
             Toast.makeText(context, "Registrasi Berhasil!", Toast.LENGTH_SHORT).show()
-            onRegistrationSuccess() // Panggil callback navigasi
+            onRegistrationSuccess()
         }
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Image(
             painter = painterResource(id = R.drawable.bg),
@@ -75,7 +75,6 @@ fun RegisterScreen(
         ) {
             Spacer(modifier = Modifier.height(120.dp))
 
-            // Logo and Title
             Image(
                 painter = painterResource(id = R.drawable.leafin),
                 contentDescription = stringResource(id = R.string.leaf_in_logo),
@@ -85,12 +84,12 @@ fun RegisterScreen(
                 text = stringResource(id = R.string.create_account),
                 fontSize = 30.sp,
                 style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(50.dp)) // Spacer antara header dan form
+            Spacer(modifier = Modifier.height(50.dp))
 
-            // --- Form Fields ---
             OutlinedTextField(
                 value = uiState.fullName,
                 onValueChange = viewModel::onFullNameChange,
@@ -161,27 +160,38 @@ fun RegisterScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
                     .height(50.dp),
-                // --- PERUBAHAN UTAMA DI SINI ---
-                shape = RoundedCornerShape(50.dp), // Membuat bentuk oval penuh
-                colors = ButtonDefaults.buttonColors( // Mengatur warna tombol
-                    containerColor = Color(0xFF89D133), // Latar belakang hijau cerah
-                    contentColor = Color.Black // Warna teks hitam
+                shape = RoundedCornerShape(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF89D133),
+                    contentColor = Color.Black
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp) // Menghilangkan bayangan
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = Color.Black // Warna progress indicator hitam agar kontras
+                        color = Color.Black
                     )
                 } else {
                     Text(
                         text = stringResource(id = R.string.register),
-                        fontSize = 20.sp, // Ukuran font lebih besar
-                        fontWeight = FontWeight.Bold, // Teks lebih tebal
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
+
+            // <-- UBAHAN 2: Teks untuk navigasi kembali ke Login
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = buildAnnotatedString {
+                    append("Sudah punya akun? ")
+                    withStyle(style = SpanStyle(color = DarkGreen, fontWeight = FontWeight.Bold)) {
+                        append("Login")
+                    }
+                },
+                modifier = Modifier.clickable { onNavigateBackToLogin() }
+            )
         }
     }
 }
@@ -189,9 +199,8 @@ fun RegisterScreen(
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    // Wrap dengan Theme aplikasi Anda agar preview sesuai
-    // YourAppTheme {
-    RegisterScreen(onRegistrationSuccess = {})
-    // }
+    RegisterScreen(
+        onRegistrationSuccess = {},
+        onNavigateBackToLogin = {} // <-- UBAHAN 3: Perbarui Preview
+    )
 }
-ini yg sebelumnya cb benerin yg hrs diganti

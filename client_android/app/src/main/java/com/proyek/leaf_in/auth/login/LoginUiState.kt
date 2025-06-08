@@ -4,5 +4,8 @@ package com.proyek.leaf_in.auth.login
  */
 data class LoginUiState(
     val email: String = "",
-    val password: String = ""
+    val password: String = "",
+    val isLoading: Boolean = false,
+    val loginError: String? = null,
+    val isLoginSuccess: Boolean = false // <-- TAMBAHKAN BARIS INI
 )
