@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.proyek.leaf_in.R // Ganti dengan package R kamu
+import com.proyek.leaf_in.R
 import com.proyek.leaf_in.ui.theme.DarkGreen
 
 @Composable
