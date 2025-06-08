@@ -1,1 +1,19 @@
-/build
+# File Android Studio yang gak perlu dimasukin Git
+.idea/
+*.iml
+
+# Folder build yang selalu berubah
+build/
+.gradle/
+*/build/
+
+# File konfigurasi lokal (contoh: setting SDK di komputer)
+local.properties
+
+# File sistem yang ganggu
+.DS_Store
+Thumbs.db
+
+# File hasil compile/apk
+*.apk
+*.ap_
