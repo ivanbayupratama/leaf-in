@@ -1,13 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">leaf_in</string>
-
-    <string name="top_background_wave">Top background wave</string>
+    <string name="app_name">Leaf-in</string>
     <string name="leaf_in_logo">Leaf-in Logo</string>
+
+    <string name="hello_title">Hello</string>
+    <string name="sign_into_account">Sign into your Account</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="new_here_register">New here? Register</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="login">Login</string>
+
+
     <string name="create_account">Create Account</string>
     <string name="full_name">Full Name</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
+    <string name="full_name_placeholder">Full Name</string>
+    <string name="email">Email</string> <string name="email_placeholder">Email</string>
+    <string name="password">Password</string> <string name="password_placeholder">Password</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_password_placeholder">Confirm Password</string>
     <string name="register">Register</string>
 
 </resources>
