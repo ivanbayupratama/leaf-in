@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,9 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.proyek.leaf_in.R // Pastikan R mengarah ke resource proyek Anda
+import coil.compose.rememberAsyncImagePainter
+import com.proyek.leaf_in.R
 import com.proyek.leaf_in.data.model.MenuItem
-import coil.compose.rememberAsyncImagePainter // Untuk memuat gambar dari URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +39,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF0F0F0)) // Warna background sesuai desain
+                .verticalScroll(rememberScrollState())
+                .background(Color(0xFFF0F0F0))
                 .padding(16.dp)
         ) {
             // Header Section
@@ -55,7 +58,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                     text = "Leaf-in",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4CAF50) // Warna hijau logo
+                    color = Color(0xFF4CAF50)
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -78,6 +81,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 
                 // Beverages Section
                 MenuSection(title = "Beverages", items = uiState.beverages)
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -117,8 +122,8 @@ fun MenuItemCard(item: MenuItem) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
-            .width(180.dp) // Sesuaikan lebar kartu
-            .height(250.dp) // Sesuaikan tinggi kartu
+            .width(180.dp)
+            .height(250.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -129,7 +134,7 @@ fun MenuItemCard(item: MenuItem) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp) // Tinggi gambar
+                    .height(120.dp)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
             )
             Column(
@@ -180,12 +185,21 @@ fun MenuItemCard(item: MenuItem) {
     }
 }
 
+// --- FUNGSI INI SUDAH DIPERBARUI ---
 @Composable
 fun BottomNavigationBar() {
     NavigationBar(
         containerColor = Color(0xFF4CAF50), // Warna hijau bottom nav
-        modifier = Modifier.height(64.dp)
+        modifier = Modifier.height(62.dp)
     ) {
+        val navItemColors = NavigationBarItemDefaults.colors(
+            indicatorColor = Color.Transparent,
+            selectedIconColor = Color.White,
+            unselectedIconColor = Color.White,
+            selectedTextColor = Color.White,
+            unselectedTextColor = Color.White
+        )
+
         NavigationBarItem(
             selected = true,
             onClick = { /* TODO: Navigate to Home */ },
@@ -193,10 +207,11 @@ fun BottomNavigationBar() {
                 Icon(
                     painter = painterResource(id = R.drawable.home_button),
                     contentDescription = "Home",
-                    tint = Color.White
+                    modifier = Modifier.size(20.dp)
                 )
             },
-            label = { Text("Home", color = Color.White) }
+            label = { Text("Home") },
+            colors = navItemColors
         )
         NavigationBarItem(
             selected = false,
@@ -205,22 +220,24 @@ fun BottomNavigationBar() {
                 Icon(
                     painter = painterResource(id = R.drawable.cart_button),
                     contentDescription = "Cart",
-                    tint = Color.White
+                    modifier = Modifier.size(20.dp)
                 )
             },
-            label = { Text("Cart", color = Color.White) }
+            label = { Text("Cart") },
+            colors = navItemColors
         )
         NavigationBarItem(
             selected = false,
             onClick = { /* TODO: Navigate to Profile */ },
             icon = {
                 Icon(
-                    painter = painterResource(id = R.drawable.profile), // Ganti dengan ikon Profile Anda
+                    painter = painterResource(id = R.drawable.profile),
                     contentDescription = "Profile",
-                    tint = Color.White
+                    modifier = Modifier.size(20.dp)
                 )
             },
-            label = { Text("Profile", color = Color.White) }
+            label = { Text("Profile") },
+            colors = navItemColors
         )
     }
 }
