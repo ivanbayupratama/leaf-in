@@ -1,26 +1,26 @@
+// path: com/proyek/leaf_in/MainActivity.kt
+
 package com.proyek.leaf_in
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
-import com.proyek.leaf_in.home.HomeScreen // Pastikan ini diimpor
+import com.proyek.leaf_in.chart.ChartScreen // <-- 1. IMPORT ChartScreen
+import com.proyek.leaf_in.home.HomeScreen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
-import dagger.hilt.android.AndroidEntryPoint // Ini penting untuk Hilt
+import dagger.hilt.android.AndroidEntryPoint
 
-// Anotasi @AndroidEntryPoint pada MainActivity agar Hilt dapat mengelola dependensi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +44,7 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "login" // Atau "home" jika mau langsung ke home untuk testing
     ) {
         composable(route = "login") {
             LoginScreen(
@@ -58,23 +58,24 @@ fun AppNavigation() {
                 }
             )
         }
-
         composable(route = "register") {
             RegisterScreen(
-                onRegistrationSuccess = {
-                    navController.popBackStack()
-                },
-                onNavigateBackToLogin = {
-                    navController.popBackStack()
-                }
+                onRegistrationSuccess = { navController.popBackStack() },
+                onNavigateBackToLogin = { navController.popBackStack() }
             )
         }
         composable(route = "home") {
-            HomeScreen()
+            // 2. PASS NavController KE HomeScreen
+            HomeScreen(navController = navController)
         }
 
-        // TODO:  fitur buat menambahkan rute untuk "cart" dan "profile" next
-        // composable(route = "cart") { CartScreen() }
+        // 3. TAMBAHKAN RUTE BARU UNTUK CHART
+        composable(route = "chart") {
+            ChartScreen(
+                // Di sini Anda bisa menambahkan parameter navigasi kembali jika perlu
+                // onBackClicked = { navController.popBackStack() }
+            )
+        }
         // composable(route = "profile") { ProfileScreen() }
     }
 }
