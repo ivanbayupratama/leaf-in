@@ -32,9 +32,6 @@ import com.proyek.leaf_in.navigation.Screen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import java.util.Locale
 
-// =====================================================================================
-// BAGIAN 1: FUNGSI "PINTAR" YANG MENGAMBIL DATA DARI VIEWMODEL
-// =====================================================================================
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -50,7 +47,12 @@ fun HomeScreen(
             navController.navigate(Screen.ProductList.createRoute(category))
         },
         onProductCardClicked = { menuItemId ->
-            // TODO: Nanti di sini tambahkan navigasi ke halaman Detail Produk
+            // ==========================================================
+            // --- PERUBAHAN 1: Tambahkan aksi navigasi di sini ---
+            // ==========================================================
+            // Di masa depan, Anda bisa menggunakan menuItemId untuk mengirim data
+            // ke halaman detail, contoh: "product_details/$menuItemId"
+            navController.navigate("product_details")
         }
     )
 }
@@ -235,7 +237,10 @@ fun MenuItemCard(
                     ) {
                         Text(text = "Order", color = Color(0xFF173006), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
-                    IconButton(onClick = { /* TODO: Show more options */ }) {
+                    // ==========================================================
+                    // --- PERUBAHAN 2: Isi onClick dengan onCardClicked ---
+                    // ==========================================================
+                    IconButton(onClick = onCardClicked) {
                         Icon(
                             painter = painterResource(id = R.drawable.desc_product),
                             contentDescription = "More options",

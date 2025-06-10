@@ -13,9 +13,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
-import com.proyek.leaf_in.cart.CartScreen // <-- 1. IMPORT CartScreen
+import com.proyek.leaf_in.beverages.BeverageScreen // Pastikan import ini ada jika digunakan
+import com.proyek.leaf_in.cart.CartScreen
 import com.proyek.leaf_in.home.HomeScreen
 import com.proyek.leaf_in.meals.MealsScreen
+// 1. TAMBAHKAN IMPORT UNTUK ProductDetailsScreen
+import com.proyek.leaf_in.productdetails.ProductDetailsScreen
+
 
 @Composable
 fun AppNavHost(
@@ -73,12 +77,16 @@ fun AppNavHost(
                     MealsScreen(navController = navController)
                 }
                 "beverages" -> {
-                    // TODO: Panggil BeveragesScreen di sini jika sudah dibuat
+                    // Jika sudah ada, panggil BeverageScreen di sini
+                    // BeverageScreen(navController = navController)
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "Halaman untuk kategori: $category")
+                    }
                 }
             }
         }
 
-        // --- 2. TAMBAHKAN RUTE UNTUK HALAMAN CART ---
+        // Rute untuk Halaman Cart
         composable(Screen.Cart.route) {
             CartScreen(
                 onBackClicked = { navController.popBackStack() },
@@ -88,7 +96,7 @@ fun AppNavHost(
             )
         }
 
-        // --- 3. TAMBAHKAN RUTE UNTUK HALAMAN PROFILE ---
+        // Rute untuk Halaman Profile
         composable(Screen.Profile.route) {
             // Untuk sementara, kita tampilkan halaman placeholder
             Box(
@@ -98,5 +106,11 @@ fun AppNavHost(
                 Text(text = "Halaman Profil")
             }
         }
+
+        // Rute untuk ke halaman detail produk
+        composable(route = "product_details") {
+            ProductDetailsScreen()
+        }
+        // ==========================================================
     }
 }

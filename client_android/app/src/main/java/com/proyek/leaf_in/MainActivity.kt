@@ -28,11 +28,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
-import com.proyek.leaf_in.beverages.BeverageScreen // <-- 1. IMPORT LAYAR BARU
+import com.proyek.leaf_in.beverages.BeverageScreen
 import com.proyek.leaf_in.cart.CartScreen
 import com.proyek.leaf_in.home.HomeScreen
 import com.proyek.leaf_in.meals.MealsScreen
 import com.proyek.leaf_in.navigation.Screen
+import com.proyek.leaf_in.productdetails.ProductDetailsScreen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,14 +49,19 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
+                // Daftar rute yang akan menampilkan Bottom Navigation Bar
                 val bottomNavRoutes = setOf(
                     Screen.Home.route,
                     Screen.Cart.route,
                     Screen.Profile.route,
-                    Screen.ProductList.route
+                    Screen.ProductList.route,
+                    "product_details" // Detail produk juga bisa punya bottom nav
                 )
-                val shouldShowBottomBar = bottomNavRoutes.any { currentRoute?.startsWith(it.removeSuffix("/{category}")) == true }
 
+                // Logika untuk menampilkan bottom bar, sudah menangani rute dinamis seperti "product_list/meals"
+                val shouldShowBottomBar = bottomNavRoutes.any { navRoute ->
+                    currentRoute?.startsWith(navRoute.removeSuffix("/{category}")) == true
+                }
 
                 Scaffold(
                     bottomBar = {
@@ -66,6 +72,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
+                    // AppNavHost sebagai "peta" utama aplikasi
                     AppNavHost(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)
@@ -148,8 +155,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             arguments = listOf(navArgument("category") { type = NavType.StringType })
         ) { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
-
-            // --- 2. PERBARUI BAGIAN INI ---
+            // Logika untuk menampilkan layar yang sesuai berdasarkan kategori
             when (category) {
                 "meals" -> MealsScreen(navController = navController)
                 "beverages" -> BeverageScreen(navController = navController)
@@ -159,9 +165,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         composable(Screen.Cart.route) {
             CartScreen(
                 onBackClicked = { navController.popBackStack() },
-                onCheckoutClicked = {
-                    // TODO: Navigasi ke halaman pembayaran nanti
-                }
+                onCheckoutClicked = { /* TODO: Navigasi ke halaman checkout */ }
             )
         }
 
@@ -169,6 +173,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = "Halaman Profil")
             }
+        }
+
+        // Rute untuk ProductDetailsScreen yang sebelumnya hilang, sekarang ditambahkan
+        composable(route = "product_details") {
+            ProductDetailsScreen()
         }
     }
 }
