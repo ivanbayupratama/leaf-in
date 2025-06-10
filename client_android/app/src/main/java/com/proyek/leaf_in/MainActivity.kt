@@ -28,8 +28,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
+import com.proyek.leaf_in.beverages.BeverageScreen // <-- 1. IMPORT LAYAR BARU
 import com.proyek.leaf_in.cart.CartScreen
 import com.proyek.leaf_in.home.HomeScreen
+import com.proyek.leaf_in.meals.MealsScreen
 import com.proyek.leaf_in.navigation.Screen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,29 +45,27 @@ class MainActivity : ComponentActivity() {
             Leaf_inTheme {
                 val navController = rememberNavController()
 
-                // "Mata-mata" untuk mengetahui halaman mana yang sedang aktif
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
-                // Daftar halaman yang Boleh menampilkan navigasi bawah
                 val bottomNavRoutes = setOf(
                     Screen.Home.route,
                     Screen.Cart.route,
-                    Screen.Profile.route
+                    Screen.Profile.route,
+                    Screen.ProductList.route
                 )
-                val shouldShowBottomBar = currentRoute in bottomNavRoutes
+                val shouldShowBottomBar = bottomNavRoutes.any { currentRoute?.startsWith(it.removeSuffix("/{category}")) == true }
+
 
                 Scaffold(
                     bottomBar = {
                         if (shouldShowBottomBar) {
-                            // Menambahkan Surface untuk efek shadow
                             Surface(shadowElevation = 8.dp) {
                                 AppBottomNavigation(navController = navController)
                             }
                         }
                     }
                 ) { innerPadding ->
-                    // AppNavHost sebagai "peta" utama aplikasi
                     AppNavHost(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)
@@ -82,8 +82,7 @@ fun AppBottomNavigation(navController: NavHostController) {
     val currentDestination = navBackStackEntry?.destination
 
     NavigationBar(
-        modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-        containerColor = Color(0xFF89D133) // Warna hijau
+        containerColor = Color(0xFF89D133)
     ) {
         val bottomNavItems = listOf(
             Triple(Screen.Home, R.drawable.home_button, "Home"),
@@ -105,7 +104,7 @@ fun AppBottomNavigation(navController: NavHostController) {
                     Icon(
                         painter = painterResource(id = iconId),
                         contentDescription = label,
-                        modifier = Modifier.size(24.dp) // Ukuran ikon
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = { Text(label, color = Color.Black) },
@@ -149,16 +148,20 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             arguments = listOf(navArgument("category") { type = NavType.StringType })
         ) { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
-            // ProductListScreen() // Ini akan diisi oleh temanmu nanti
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Halaman untuk kategori: $category")
+
+            // --- 2. PERBARUI BAGIAN INI ---
+            when (category) {
+                "meals" -> MealsScreen(navController = navController)
+                "beverages" -> BeverageScreen(navController = navController)
             }
         }
 
         composable(Screen.Cart.route) {
             CartScreen(
                 onBackClicked = { navController.popBackStack() },
-                onCheckoutClicked = { /* TODO: Navigasi ke halaman checkout */ }
+                onCheckoutClicked = {
+                    // TODO: Navigasi ke halaman pembayaran nanti
+                }
             )
         }
 

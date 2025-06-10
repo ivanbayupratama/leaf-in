@@ -1,6 +1,10 @@
 package com.proyek.leaf_in.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -9,13 +13,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
+import com.proyek.leaf_in.cart.CartScreen // <-- 1. IMPORT CartScreen
 import com.proyek.leaf_in.home.HomeScreen
+import com.proyek.leaf_in.meals.MealsScreen
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = Screen.Login.route // Aplikasi dimulai dari halaman Login
+    startDestination: String = Screen.Login.route
 ) {
     NavHost(
         navController = navController,
@@ -26,8 +32,6 @@ fun AppNavHost(
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    // Jika login berhasil, pindah ke Home dan hapus halaman login dari history
-                    // agar pengguna tidak bisa kembali ke halaman login dengan tombol back.
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) {
                             inclusive = true
@@ -35,7 +39,6 @@ fun AppNavHost(
                     }
                 },
                 onNavigateToRegister = {
-                    // Pindah ke halaman Register
                     navController.navigate(Screen.Register.route)
                 }
             )
@@ -45,24 +48,55 @@ fun AppNavHost(
         composable(Screen.Register.route) {
             RegisterScreen(
                 onRegistrationSuccess = {
-                    // Jika registrasi berhasil, kembali ke halaman sebelumnya (Login)
                     navController.popBackStack()
                 },
-                // Kita beri nama onNavigateToLogin agar lebih jelas
                 onNavigateBackToLogin = {
-                    // Kembali ke halaman sebelumnya (Login)
                     navController.popBackStack()
                 }
             )
         }
 
-        // Rute untuk Halaman Home (yang ada preview Meals & Beverages)
+        // Rute untuk Halaman Home
         composable(Screen.Home.route) {
-            // Kita panggil HomeScreen yang sudah kita buat
             HomeScreen(navController = navController)
         }
 
         // Rute untuk Halaman Daftar Produk ("Show All")
+        composable(
+            route = Screen.ProductList.route,
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category")
 
+            when (category) {
+                "meals" -> {
+                    MealsScreen(navController = navController)
+                }
+                "beverages" -> {
+                    // TODO: Panggil BeveragesScreen di sini jika sudah dibuat
+                }
+            }
+        }
+
+        // --- 2. TAMBAHKAN RUTE UNTUK HALAMAN CART ---
+        composable(Screen.Cart.route) {
+            CartScreen(
+                onBackClicked = { navController.popBackStack() },
+                onCheckoutClicked = {
+                    // TODO: Navigasi ke halaman pembayaran
+                }
+            )
+        }
+
+        // --- 3. TAMBAHKAN RUTE UNTUK HALAMAN PROFILE ---
+        composable(Screen.Profile.route) {
+            // Untuk sementara, kita tampilkan halaman placeholder
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Halaman Profil")
+            }
+        }
     }
 }
