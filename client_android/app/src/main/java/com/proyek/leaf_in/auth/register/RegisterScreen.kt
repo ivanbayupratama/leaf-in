@@ -30,15 +30,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel // Menggunakan hiltViewModel()
 import com.proyek.leaf_in.R
 import com.proyek.leaf_in.ui.theme.DarkGreen // Pastikan Anda punya warna ini
 
 @Composable
 fun RegisterScreen(
-    viewModel: RegisterViewModel = viewModel(),
+    viewModel: RegisterViewModel = hiltViewModel(), // Menggunakan hiltViewModel()
     onRegistrationSuccess: () -> Unit,
-    onNavigateBackToLogin: () -> Unit // <-- UBAHAN 1: Parameter baru
+    onNavigateBackToLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -181,7 +181,6 @@ fun RegisterScreen(
                 }
             }
 
-            // <-- UBAHAN 2: Teks untuk navigasi kembali ke Login
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = buildAnnotatedString {
@@ -201,6 +200,6 @@ fun RegisterScreen(
 fun RegisterScreenPreview() {
     RegisterScreen(
         onRegistrationSuccess = {},
-        onNavigateBackToLogin = {} // <-- UBAHAN 3: Perbarui Preview
+        onNavigateBackToLogin = {}
     )
 }

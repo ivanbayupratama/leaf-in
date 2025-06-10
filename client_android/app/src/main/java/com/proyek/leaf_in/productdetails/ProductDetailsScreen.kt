@@ -217,7 +217,7 @@ fun ProductContent(
 @Composable
 fun ProductDetailsScreenPreview() {
     val mockProduct = Product(
-        id = 1L,
+        id = "1",
         name = "Bubur Ayam",
         description = "Warm rice porridge topped with shredded chicken, fried shallots, soy sauce, and crispy crackers. Light, tasty, and comforting – perfect any time of day.",
         price = 15000L,
