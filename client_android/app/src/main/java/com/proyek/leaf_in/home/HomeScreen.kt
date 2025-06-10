@@ -19,254 +19,65 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.proyek.leaf_in.R
 import com.proyek.leaf_in.data.model.MenuItem
-import com.proyek.leaf_in.ui.theme.Leaf_inTheme // Pastikan import tema Anda benar
+import com.proyek.leaf_in.navigation.Screen
+import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+// =================================================================================
+// BAGIAN 1: FUNGSI UTAMA YANG TERHUBUNG KE VIEWMODEL ("PINTAR")
+// =================================================================================
+
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    // Mengambil data dari ViewModel
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            // Dibungkus dengan Surface untuk efek shadow
-            Surface(shadowElevation = 20.dp) {
-                BottomNavigationBar()
-            }
+    // Memanggil Composable yang hanya bertugas menggambar UI
+    HomeScreenContent(
+        uiState = uiState,
+        onShowAllClicked = { category ->
+            // Logika navigasi saat tombol "Show All" diklik
+            navController.navigate(Screen.ProductList.createRoute(category))
+        },
+        onProductCardClicked = { menuItemId ->
+            // TODO: Nanti di sini tambahkan navigasi ke halaman Detail Produk
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .background(Color(0xFFF0F0F0)) // Warna background sesuai desain
-                .padding(16.dp)
-        ) {
-            // Header Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.leafin),
-                    contentDescription = "Leaf-in Logo",
-                    modifier = Modifier.size(80.dp) // Ukuran logo
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.nama), // Gambar nama "Leaf-in"
-                    contentDescription = "Leaf-in Name",
-                    modifier = Modifier.size(85.dp) // Ukuran nama
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Hello, what can I get for you today?",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-            } else if (uiState.errorMessage != null) {
-                Text(text = "Error: ${uiState.errorMessage}", color = Color.Red)
-            } else {
-                // Meals Section
-                MenuSection(title = "Meals", items = uiState.meals)
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Beverages Section
-                MenuSection(title = "Beverages", items = uiState.beverages)
-
-                Spacer(modifier = Modifier.height(16.dp)) // Tambahan spacer di bawah beverages
-            }
-        }
-    }
+    )
 }
 
-@Composable
-fun MenuSection(title: String, items: List<MenuItem>) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-        TextButton(onClick = { /* TODO: Navigate to All Menu items */ }) {
-            Text(text = "Show All", color = Color(0xFFED1A1A)) // Warna merah "Show All"
-        }
-    }
-    Spacer(modifier = Modifier.height(16.dp))
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(items) { item ->
-            MenuItemCard(item = item)
-        }
-    }
-}
+// =================================================================================
+// BAGIAN 2: FUNGSI YANG HANYA MENGGAMBAR TAMPILAN ("BODOH")
+// =================================================================================
 
 @Composable
-fun MenuItemCard(item: MenuItem) {
-    Card(
-        shape = RoundedCornerShape(26.dp), // Radius sudut untuk Card
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        // Warna container utama Card tetap putih
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+fun HomeScreenContent(
+    uiState: HomeUiState,
+    onShowAllClicked: (category: String) -> Unit,
+    onProductCardClicked: (menuItemId: String) -> Unit
+) {
+    // Column utama yang bisa di-scroll
+    Column(
         modifier = Modifier
-            .width(180.dp)
-            .height(250.dp)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(Color(0xFFF0F0F0))
+            .padding(bottom = 16.dp) // Beri padding bawah agar tidak terlalu mepet
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Gambar Produk
-            Image(
-                painter = rememberAsyncImagePainter(model = item.imageUrl),
-                contentDescription = item.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp) // Tinggi gambar
-                    // Radius sudut atas gambar sesuai dengan Card
-                    .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
-            )
-
-            // Area Hijau Lemon untuk Detail Produk
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f) // Mengambil sisa ruang vertikal
-                    // Background hijau lemon dengan radius sudut bawah Card
-                    .background(Color(0xFF89D133), shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
-                    .padding(10.dp) // Padding di dalam area hijau lemon
-            ) {
-                Text(
-                    text = item.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black, // Warna teks di atas hijau
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Rp. ${String.format(Locale("id", "ID"), "%,.0f", item.price)}", // Perbaikan di sini
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black // Warna teks di atas hijau
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Button(
-                        onClick = { /* TODO: Add to cart */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Tombol 'Order' menjadi putih
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(text = "Order", color = Color(0xFF173006), fontSize = 12.sp, fontWeight = FontWeight.Bold) // Warna teks tombol 'Order'
-                    }
-                    IconButton(onClick = { /* TODO: Show more options */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.desc_product),
-                            contentDescription = "More options",
-                            tint = Color(0xFF173006) // Warna ikon '...'
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun BottomNavigationBar() {
-    NavigationBar(
-        containerColor = Color(0xFF89D133), // Warna hijau lemon untuk bottom nav
-        modifier = Modifier.height(62.dp) // Tinggi bottom nav
-    ) {
-        val navItemColors = NavigationBarItemDefaults.colors(
-            indicatorColor = Color.Transparent, // Hilangkan indikator saat item dipilih
-            selectedIconColor = Color.Black, // Warna ikon saat dipilih
-            unselectedIconColor = Color.Black, // Warna ikon saat tidak dipilih
-            selectedTextColor = Color.Black, // Warna teks saat dipilih
-            unselectedTextColor = Color.Black // Warna teks saat tidak dipilih
-        )
-
-        NavigationBarItem(
-            selected = true,
-            onClick = { /* TODO: Navigate to Home */ },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.home_button),
-                    contentDescription = "Home",
-                    modifier = Modifier.size(20.dp) // Ukuran ikon
-                )
-            },
-            label = { Text("Home") },
-            colors = navItemColors
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { /* TODO: Navigate to Cart */ },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.cart_button),
-                    contentDescription = "Cart",
-                    modifier = Modifier.size(20.dp) // Ukuran ikon
-                )
-            },
-            label = { Text("Cart") },
-            colors = navItemColors
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { /* TODO: Navigate to Profile */ },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Profile",
-                    modifier = Modifier.size(20.dp) // Ukuran ikon
-                )
-            },
-            label = { Text("Profile") },
-            colors = navItemColors
-        )
-    }
-}
-
-// --- Bagian PREVIEW ---
-
-@Preview(showBackground = true, showSystemUi = true, name = "HomeScreen Preview")
-@Composable
-fun PreviewHomeScreen() {
-    // Pastikan ini adalah nama tema aplikasi Anda yang benar
-    Leaf_inTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF0F0F0))
-                .padding(16.dp)
-        ) {
-            // Header Section (dari HomeScreen Anda)
+        // --- Bagian Header ---
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Spacer(modifier = Modifier.height(24.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -280,7 +91,7 @@ fun PreviewHomeScreen() {
                 Image(
                     painter = painterResource(id = R.drawable.nama),
                     contentDescription = "Leaf-in Name",
-                    modifier = Modifier.size(85.dp)
+                    modifier = Modifier.height(80.dp)
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -290,53 +101,191 @@ fun PreviewHomeScreen() {
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Data Dummy untuk Preview
-            val dummyMeals = listOf(
-                MenuItem(id = "1", name = "Toast", imageUrl = "https://via.placeholder.com/150/FFD700/000000?text=Toast", price = 25000.0, category = "Meals"),
-                MenuItem(id = "2", name = "Bubur Ayam", imageUrl = "https://via.placeholder.com/150/ADD8E6/000000?text=Bubur", price = 15000.0, category = "Meals"),
-                MenuItem(id = "3", name = "Salad", imageUrl = "https://via.placeholder.com/150/90EE90/000000?text=Salad", price = 40000.0, category = "Meals"),
-            )
-            val dummyBeverages = listOf(
-                MenuItem(id = "4", name = "Smoothies", imageUrl = "https://via.placeholder.com/150/FFB6C1/000000?text=Smoothies", price = 25000.0, category = "Beverages"),
-                MenuItem(id = "5", name = "Jamu Beras Kencur", imageUrl = "https://via.placeholder.com/150/F0E68C/000000?text=Jamu", price = 8000.0, category = "Beverages"),
-                MenuItem(id = "6", name = "Green Tea", imageUrl = "https://via.placeholder.com/150/8FBC8F/000000?text=Green+Tea", price = 12000.0, category = "Beverages"),
-            )
-
-            // Meals Section
-            MenuSection(title = "Meals", items = dummyMeals)
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Beverages Section
-            MenuSection(title = "Beverages", items = dummyBeverages)
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
-        // Untuk melihat Bottom Nav di Preview HomeScreen, Anda bisa membungkusnya dalam Scaffold
-        // atau membuat Preview terpisah untuk BottomNavigationBar seperti di bawah.
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- Logika Tampilan Konten ---
+        when {
+            uiState.isLoading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
+            uiState.errorMessage != null -> {
+                Text(
+                    text = "Error: ${uiState.errorMessage}",
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+            else -> {
+                // --- Bagian Meals ---
+                MenuSection(
+                    title = "Meals",
+                    items = uiState.meals,
+                    onShowAllClicked = { onShowAllClicked("meals") },
+                    onProductCardClicked = onProductCardClicked
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // --- Bagian Beverages ---
+                MenuSection(
+                    title = "Beverages",
+                    items = uiState.beverages,
+                    onShowAllClicked = { onShowAllClicked("beverages") },
+                    onProductCardClicked = onProductCardClicked
+                )
+            }
+        }
     }
 }
 
-@Preview(showBackground = true, name = "MenuItemCard Preview")
+// =================================================================================
+// BAGIAN 3: KOMPONEN-KOMPONEN KECIL YANG DIPAKAI ULANG
+// =================================================================================
+
 @Composable
-fun PreviewMenuItemCard() {
-    Leaf_inTheme {
-        val dummyItem = MenuItem(
-            id = "7",
-            name = "Nasi Goreng Spesial",
-            imageUrl = "https://via.placeholder.com/150/FF6347/000000?text=Nasi+Goreng",
-            price = 30000.0,
-            category = "Meals"
+fun MenuSection(
+    title: String,
+    items: List<MenuItem>,
+    onShowAllClicked: () -> Unit,
+    onProductCardClicked: (String) -> Unit
+) {
+    // Baris untuk Judul dan tombol "Show All"
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
         )
-        MenuItemCard(item = dummyItem)
+        TextButton(onClick = onShowAllClicked) {
+            Text(text = "Show All", color = Color(0xFFED1A1A))
+        }
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Daftar produk horizontal
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(items) { item ->
+            MenuItemCard(
+                item = item,
+                onCardClicked = { onProductCardClicked(item.id) }
+            )
+        }
     }
 }
 
-@Preview(showBackground = true, name = "BottomNav Preview")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreviewBottomNavigationBar() {
+fun MenuItemCard(
+    item: MenuItem,
+    modifier: Modifier = Modifier,
+    onCardClicked: () -> Unit = {}
+) {
+    Card(
+        onClick = onCardClicked, // Membuat seluruh kartu bisa diklik
+        shape = RoundedCornerShape(26.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = modifier.width(180.dp)
+    ) {
+        Column {
+            Image(
+                painter = rememberAsyncImagePainter(model = item.imageUrl),
+                contentDescription = item.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF89D133), shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = item.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    maxLines = 1
+                )
+                Text(
+                    text = "Rp. ${String.format(Locale("id", "ID"), "%,.0f", item.price)}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = { /* TODO: Add to cart */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(text = "Order", color = Color(0xFF173006), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    IconButton(onClick = { /* TODO: Show more options */ }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.desc_product),
+                            contentDescription = "More options",
+                            tint = Color(0xFF173006)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// =================================================================================
+// BAGIAN 4: FUNGSI KHUSUS UNTUK PREVIEW
+// =================================================================================
+
+@Preview(showBackground = true, name = "Halaman Home Lengkap")
+@Composable
+fun HomeScreenPreview() {
+    val dummyMeals = listOf(
+        MenuItem("1", "Toast Enak Sekali", "url", 25000.0, "Meals"),
+        MenuItem("2", "Bubur Ayam", "url", 15000.0, "Meals")
+    )
+    val dummyBeverages = listOf(
+        MenuItem("4", "Smoothies", "url", 25000.0, "Beverages"),
+        MenuItem("6", "Green Tea", "url", 12000.0, "Beverages")
+    )
+    val dummyState = HomeUiState(meals = dummyMeals, beverages = dummyBeverages)
+
     Leaf_inTheme {
-        BottomNavigationBar()
+        HomeScreenContent(
+            uiState = dummyState,
+            onShowAllClicked = {},
+            onProductCardClicked = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Satu Kartu Produk")
+@Composable
+fun MenuItemCardPreview() {
+    val dummyItem = MenuItem("1", "Nasi Goreng Sehat", "url", 30000.0, "Meals")
+    Leaf_inTheme {
+        MenuItemCard(item = dummyItem)
     }
 }
