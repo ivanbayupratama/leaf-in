@@ -27,6 +27,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.proyek.leaf_in.R
 import com.proyek.leaf_in.data.model.MenuItem
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme // Pastikan import tema Anda benar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,7 +165,7 @@ fun MenuItemCard(item: MenuItem) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Rp. ${String.format("%,.0f", item.price)}",
+                    text = "Rp. ${String.format(Locale("id", "ID"), "%,.0f", item.price)}", // Perbaikan di sini
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black // Warna teks di atas hijau
