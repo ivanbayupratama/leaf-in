@@ -1,28 +1,49 @@
 package com.proyek.leaf_in.data.repository
 
 import com.proyek.leaf_in.data.model.MenuItem
-// Import service API Anda di sini, contoh:
-// import com.proyek.leaf_in.data.network.ApiService // Anggap ada ApiService
-
+import com.proyek.leaf_in.data.remote.api.ApiService
+import com.proyek.leaf_in.data.local.dao.MenuItemDao // <<< Pastikan ini diimpor
+import com.proyek.leaf_in.data.local.entities.MenuItemEntity // <<< Pastikan ini diimpor
+import kotlinx.coroutines.flow.Flow // <<< Pastikan ini diimpor
+import kotlinx.coroutines.flow.map // <<< Pastikan ini diimpor
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MenuRepository @Inject constructor(
-    // private val apiService: ApiService // Uncomment jika sudah ada ApiService
+    private val apiService: ApiService,
+    private val menuItemDao: MenuItemDao // <<< Pastikan ini disuntikkan
 ) {
-    // Fungsi ini akan memanggil API atau database untuk mendapatkan data menu
-    suspend fun getAllMenuItems(): List<MenuItem> {
-        // TODO: Implement actual API call here
-        // Untuk sementara, kita pakai data dummy
-        return listOf(
-            MenuItem(id = "1", name = "Toast", imageUrl = "url_toast", price = 25000.0, category = "Meals"),
-            MenuItem(id = "2", name = "Bubur Ayam", imageUrl = "url_bubur", price = 15000.0, category = "Meals"),
-            MenuItem(id = "3", name = "Salad", imageUrl = "url_salad", price = 40000.0, category = "Meals"),
-            MenuItem(id = "4", name = "Smoothies", imageUrl = "url_smoothies", price = 25000.0, category = "Beverages"),
-            MenuItem(id = "5", name = "Jamu Beras Kencur", imageUrl = "url_jamu", price = 8000.0, category = "Beverages"),
-            MenuItem(id = "6", name = "Green Tea", imageUrl = "url_greentea", price = 12000.0, category = "Beverages"),
-        )
-        // return apiService.getMenuItems() // Contoh jika menggunakan Retrofit
+    /**
+     * Mengambil semua produk dari database lokal (Room) sebagai Flow.
+     * Ini akan otomatis update setiap kali data di Room berubah.
+     */
+    fun getAllProducts(): Flow<List<MenuItem>> { // <<< Sekarang mengembalikan Flow
+        return menuItemDao.getAllMenuItems().map { entities ->
+            entities.map { it.toMenuItem() } // Konversi dari Entity Room ke Model API
+        }
+    }
+
+    /**
+     * Memuat ulang data produk dari API dan menyimpannya ke database lokal (Room).
+     * Ini harus dipanggil secara terpisah (misalnya, saat aplikasi dibuka atau pull-to-refresh).
+     */
+    suspend fun refreshProducts() { // <<< Fungsi baru untuk refresh dari API
+        try {
+            val apiMenuItems = apiService.getAllProducts()
+            val entitiesToInsert = apiMenuItems.map { MenuItemEntity.fromMenuItem(it) }
+            menuItemDao.insertMenuItems(entitiesToInsert) // Simpan ke Room
+        } catch (e: Exception) {
+            // Tangani error (misalnya, tidak ada koneksi internet saat refresh)
+            // Penting untuk melempar error agar ViewModel bisa menanganinya dan menampilkan pesan ke UI.
+            throw e
+        }
+    }
+
+    /**
+     * Menghapus semua item dari cache lokal. Berguna untuk fitur logout atau debug.
+     */
+    suspend fun clearCache() {
+        menuItemDao.deleteAllMenuItems()
     }
 }

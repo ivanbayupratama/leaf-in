@@ -6,24 +6,15 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Qualifier
 import javax.inject.Singleton
-
-@Qualifier
-@Retention(AnnotationRetention.RUNTIME)
-annotation class IoDispatcher
+import com.proyek.leaf_in.di.IoDispatcher // <<< PASTIKAN IMPORT INI ADA
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    @IoDispatcher // <<< TAMBAHKAN ANOTASI INI DI SINI
     @Provides
-    @Singleton
-    fun provideMenuRepository(): com.proyek.leaf_in.data.repository.MenuRepository {
-        return com.proyek.leaf_in.data.repository.MenuRepository() // Hilt akan inject dependencies di dalamnya
-    }
-
-    @IoDispatcher
-    @Provides
+    @Singleton // Opsional: Tambahkan @Singleton untuk provideIoDispatcher jika Anda ingin instance tunggal
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

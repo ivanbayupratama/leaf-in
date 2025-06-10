@@ -1,76 +1,65 @@
-package com.proyek.leaf_in.auth.login // Ganti dengan nama package kamu
+package com.proyek.leaf_in.auth.login // Atau package presentation.auth Anda
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.proyek.leaf_in.data.model.AuthRequest
+import com.proyek.leaf_in.data.model.AuthResponse
+import com.proyek.leaf_in.data.repository.AuthRepository
+import com.proyek.leaf_in.data.local.UserPreferencesRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
+) : ViewModel() {
 
-    // _uiState bersifat private agar hanya bisa diubah dari dalam ViewModel
     private val _uiState = MutableStateFlow(LoginUiState())
-    // uiState diekspos ke UI agar bisa "dibaca" (read-only)
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    /**
-     * Dipanggil setiap kali teks di field email berubah.
-     */
-    fun onEmailChange(newEmail: String) {
-        _uiState.update { currentState ->
-            currentState.copy(email = newEmail)
-        }
+    fun onEmailChange(email: String) {
+        _uiState.update { it.copy(email = email, loginError = null) }
     }
 
-    /**
-     * Dipanggil setiap kali teks di field password berubah.
-     */
-    fun onPasswordChange(newPassword: String) {
-        _uiState.update { currentState ->
-            currentState.copy(password = newPassword)
-        }
+    fun onPasswordChange(password: String) {
+        _uiState.update { it.copy(password = password, loginError = null) }
     }
-
-    /**
-     * Dipanggil saat tombol Login diklik.
-     * TODO: Tambahkan logika login di sini.
-     */
-    // Di dalam kelas LoginViewModel Anda
 
     fun onLoginClick() {
-        // ...
-        // Misalkan Anda melakukan validasi atau memanggil repository di sini
-        // ...
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, loginError = null) }
+            try {
+                val request = AuthRequest(
+                    email = _uiState.value.email,
+                    password = _uiState.value.password
+                )
+                val response = authRepository.loginUser(request)
 
-        // --- KETIKA PROSES LOGIN BERHASIL ---
-        // (misalnya setelah mendapat respons sukses dari API/Firebase)
-        // Update state untuk menandakan login sukses
-        _uiState.update { currentState ->
-            currentState.copy(
-                isLoginSuccess = true // <-- UBAH STATE DI SINI
-            )
+                // PERBAIKI INI: Gunakan isNullOrEmpty() untuk String?
+                if (!response.token.isNullOrEmpty()) {
+                    userPreferencesRepository.saveAuthToken(response.token)
+                    _uiState.update { it.copy(isLoading = false, isLoginSuccess = true) }
+                } else {
+                    // PERBAIKI INI: Sekarang response.message adalah String?, Elvis operator berfungsi benar
+                    _uiState.update { it.copy(isLoading = false, loginError = response.message ?: "Login gagal: Email atau password salah.") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, loginError = e.message ?: "Terjadi kesalahan koneksi atau server.") }
+            }
         }
-
-        // --- JIKA GAGAL ---
-        // Anda bisa meng-update state error
-        // _uiState.update { currentState ->
-        //     currentState.copy(loginError = "Email atau password salah")
-        // }
     }
 
-    /**
-     * Dipanggil saat teks "Register" diklik.
-     * TODO: Tambahkan logika navigasi ke halaman register.
-     */
-    fun onRegisterClick() {
-        println("Navigate to Register screen")
-    }
-
-    /**
-     * Dipanggil saat teks "Forgot password" diklik.
-     * TODO: Tambahkan logika untuk lupa password.
-     */
     fun onForgotPasswordClick() {
-        println("Navigate to Forgot Password screen")
+        // TODO: Implement navigasi ke forgot password
+    }
+
+    fun errorShown() {
+        _uiState.update { it.copy(loginError = null) }
     }
 }

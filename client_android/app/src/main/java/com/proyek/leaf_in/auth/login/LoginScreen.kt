@@ -1,5 +1,6 @@
 package com.proyek.leaf_in.auth.login
 
+import android.widget.Toast // Import Toast untuk pesan
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext // Import LocalContext untuk Toast
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,22 +29,28 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel // Ganti viewModel() dengan hiltViewModel()
 import com.proyek.leaf_in.R
 import com.proyek.leaf_in.ui.theme.DarkGreen
 
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel = viewModel(),
-    onLoginSuccess: () -> Unit,      // <-- UBAHAN 1
+    loginViewModel: LoginViewModel = hiltViewModel(), // Menggunakan hiltViewModel()
+    onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
     val uiState by loginViewModel.uiState.collectAsState()
+    val context = LocalContext.current // Dapatkan context untuk Toast
 
-    // <-- UBAHAN 2: Menangani navigasi ketika login sukses
-    LaunchedEffect(key1 = uiState.isLoginSuccess) {
+    // Menangani navigasi, pesan sukses, dan pesan error
+    LaunchedEffect(key1 = uiState.isLoginSuccess, key2 = uiState.loginError) {
         if (uiState.isLoginSuccess) {
+            Toast.makeText(context, "Login Berhasil!", Toast.LENGTH_SHORT).show()
             onLoginSuccess()
+        }
+        if (uiState.loginError != null) {
+            Toast.makeText(context, uiState.loginError, Toast.LENGTH_SHORT).show()
+            loginViewModel.errorShown() // Memberi tahu ViewModel bahwa error sudah ditampilkan
         }
     }
 
@@ -161,18 +169,35 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             // === Tombol Login ===
-            Text(
-                text = "Login",
-                color = Color.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
+            Button( // Menggunakan Button daripada Text clickable
+                onClick = { loginViewModel.onLoginClick() },
+                enabled = !uiState.isLoading, // Nonaktifkan tombol saat loading
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .clip(RoundedCornerShape(50))
-                    .background(Color(0xFF89D133))
-                    .clickable { loginViewModel.onLoginClick() }
-                    .padding(horizontal = 25.dp, vertical = 10.dp)
-            )
+                    .fillMaxWidth() // Pastikan Button mengisi lebar penuh
+                    .padding(horizontal = 20.dp) // Sesuaikan padding horizontal
+                    .height(50.dp), // Beri tinggi tetap
+                shape = RoundedCornerShape(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF89D133),
+                    contentColor = Color.Black
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.Black
+                    )
+                } else {
+                    Text(
+                        text = "Login",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center // Rata tengah teks di dalam Button
+                    )
+                }
+            }
         }
     }
 }
@@ -182,7 +207,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     LoginScreen(
-        onLoginSuccess = {}, // <-- UBAHAN 3
+        onLoginSuccess = {},
         onNavigateToRegister = {}
     )
 }

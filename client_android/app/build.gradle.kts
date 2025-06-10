@@ -77,6 +77,9 @@ dependencies {
 
     // Coil for Image Loading
     implementation(libs.coil.compose)
+    // Room Database
+    implementation("androidx.room:room-ktx:2.6.1") // Untuk dukungan Coroutine dan Flow
+    ksp("androidx.room:room-compiler:2.6.1")
 
     // Testing
     testImplementation(libs.junit)
@@ -86,4 +89,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.debug.androidx.ui.tooling)
     debugImplementation(libs.debug.androidx.ui.test.manifest)
+
+    // Retrofit & GSON Converter
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    // (Opsional tapi sangat membantu) Untuk melihat log request & response API
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+ //Datastore Preferences
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }
