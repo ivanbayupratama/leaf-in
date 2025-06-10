@@ -25,10 +25,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+
 import coil.compose.rememberAsyncImagePainter
 import com.proyek.leaf_in.R
 import com.proyek.leaf_in.data.model.MenuItem
 import com.proyek.leaf_in.navigation.Screen
+
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import com.proyek.leaf_in.R
+import com.proyek.leaf_in.data.model.MenuItem
+
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import java.util.Locale
 
@@ -37,10 +45,15 @@ import java.util.Locale
 // =================================================================================
 
 @Composable
+
+
+// 1. TAMBAHKAN NavController SEBAGAI PARAMETER
+
 fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+
     // Mengambil data dari ViewModel
     val uiState by viewModel.uiState.collectAsState()
 
@@ -78,6 +91,27 @@ fun HomeScreenContent(
         // --- Bagian Header ---
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Spacer(modifier = Modifier.height(24.dp))
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    Scaffold(
+        bottomBar = {
+            Surface(shadowElevation = 20.dp) {
+                // 2. PASS NavController KE BottomNavigationBar
+                BottomNavigationBar(navController = navController)
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .background(Color(0xFFF0F0F0))
+                .padding(16.dp)
+        ) {
+            // Header Section
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -91,7 +125,11 @@ fun HomeScreenContent(
                 Image(
                     painter = painterResource(id = R.drawable.nama),
                     contentDescription = "Leaf-in Name",
+
                     modifier = Modifier.height(80.dp)
+
+                    modifier = Modifier.size(85.dp)
+
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -109,6 +147,7 @@ fun HomeScreenContent(
         when {
             uiState.isLoading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+
             }
             uiState.errorMessage != null -> {
                 Text(
@@ -134,6 +173,15 @@ fun HomeScreenContent(
                     onShowAllClicked = { onShowAllClicked("beverages") },
                     onProductCardClicked = onProductCardClicked
                 )
+
+            } else if (uiState.errorMessage != null) {
+                Text(text = "Error: ${uiState.errorMessage}", color = Color.Red)
+            } else {
+                MenuSection(title = "Meals", items = uiState.meals)
+                Spacer(modifier = Modifier.height(24.dp))
+                MenuSection(title = "Beverages", items = uiState.beverages)
+                Spacer(modifier = Modifier.height(16.dp))
+
             }
         }
     }
@@ -164,7 +212,11 @@ fun MenuSection(
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
+
         TextButton(onClick = onShowAllClicked) {
+
+        TextButton(onClick = { /* TODO: Navigate to All Menu items */ }) {
+
             Text(text = "Show All", color = Color(0xFFED1A1A))
         }
     }
@@ -192,13 +244,22 @@ fun MenuItemCard(
     onCardClicked: () -> Unit = {}
 ) {
     Card(
+
         onClick = onCardClicked, // Membuat seluruh kartu bisa diklik
+
+
         shape = RoundedCornerShape(26.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = modifier.width(180.dp)
     ) {
+
         Column {
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+
             Image(
                 painter = rememberAsyncImagePainter(model = item.imageUrl),
                 contentDescription = item.name,
@@ -206,14 +267,24 @@ fun MenuItemCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
+
+
+                    .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
+
             )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+
                     .background(Color(0xFF89D133), shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
                     .padding(12.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.Start
+
+                    .weight(1f)
+                    .background(Color(0xFF89D133), shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
+                    .padding(10.dp)
+
             ) {
                 Text(
                     text = item.name,
@@ -255,12 +326,81 @@ fun MenuItemCard(
     }
 }
 
+
 // =================================================================================
 // BAGIAN 4: FUNGSI KHUSUS UNTUK PREVIEW
 // =================================================================================
 
+@Composable
+// 3. TAMBAHKAN NavController SEBAGAI PARAMETER
+fun BottomNavigationBar(navController: NavController) {
+    // Kode untuk mendeteksi halaman/rute yang aktif saat ini
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    NavigationBar(
+        containerColor = Color(0xFF89D133),
+        modifier = Modifier.height(62.dp)
+    ) {
+        val navItemColors = NavigationBarItemDefaults.colors(
+            indicatorColor = Color.Transparent,
+            selectedIconColor = Color.Black,
+            unselectedIconColor = Color.Black,
+            selectedTextColor = Color.Black,
+            unselectedTextColor = Color.Black
+        )
+
+        NavigationBarItem(
+            // 4. BUAT 'selected' MENJADI DINAMIS
+            selected = currentRoute == "home",
+            // 5. ISI FUNGSI ONCLICK DENGAN NAVIGASI
+            onClick = { navController.navigate("home") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.home_button),
+                    contentDescription = "Home",
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+            label = { Text("Home") },
+            colors = navItemColors
+        )
+        NavigationBarItem(
+            selected = currentRoute == "chart",
+            onClick = { navController.navigate("chart") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.cart_button),
+                    contentDescription = "Cart",
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+            label = { Text("Cart") },
+            colors = navItemColors
+        )
+        NavigationBarItem(
+            selected = currentRoute == "profile",
+            onClick = { /* TODO: navController.navigate("profile") */ },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Profile",
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+            label = { Text("Profile") },
+            colors = navItemColors
+        )
+    }
+}
+
+
+// --- Bagian PREVIEW --- (Tidak ada perubahan fungsional, hanya perbaikan agar tidak error)
+
+
 @Preview(showBackground = true, name = "Halaman Home Lengkap")
 @Composable
+
 fun HomeScreenPreview() {
     val dummyMeals = listOf(
         MenuItem("1", "Toast Enak Sekali", "url", 25000.0, "Meals"),
@@ -271,6 +411,18 @@ fun HomeScreenPreview() {
         MenuItem("6", "Green Tea", "url", 12000.0, "Beverages")
     )
     val dummyState = HomeUiState(meals = dummyMeals, beverages = dummyBeverages)
+
+
+fun PreviewHomeScreen() {
+    Leaf_inTheme {
+        // Karena HomeScreen sekarang butuh NavController, kita buat dummy di preview
+        HomeScreen(navController = rememberNavController())
+    }
+}
+
+@Preview(showBackground = true, name = "MenuItemCard Preview")
+@Composable
+fun PreviewMenuItemCard() {
 
     Leaf_inTheme {
         HomeScreenContent(
@@ -286,6 +438,11 @@ fun HomeScreenPreview() {
 fun MenuItemCardPreview() {
     val dummyItem = MenuItem("1", "Nasi Goreng Sehat", "url", 30000.0, "Meals")
     Leaf_inTheme {
+
         MenuItemCard(item = dummyItem)
+
+        // Karena BottomNavigationBar sekarang butuh NavController, kita buat dummy di preview
+        BottomNavigationBar(navController = rememberNavController())
+
     }
 }

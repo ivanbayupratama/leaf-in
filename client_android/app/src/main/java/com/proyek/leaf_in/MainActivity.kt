@@ -1,10 +1,12 @@
+// path: com/proyek/leaf_in/MainActivity.kt
+
 package com.proyek.leaf_in
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +23,13 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,8 +37,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
+
 import com.proyek.leaf_in.home.HomeScreen
 import com.proyek.leaf_in.navigation.Screen
+
+import com.proyek.leaf_in.chart.ChartScreen // <-- 1. IMPORT ChartScreen
+import com.proyek.leaf_in.home.HomeScreen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -122,8 +135,12 @@ fun AppBottomNavigation(navController: NavHostController) {
 fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
+
         startDestination = Screen.Login.route,
         modifier = modifier
+=======
+        startDestination = "login" // Atau "home" jika mau langsung ke home untuk testing
+
     ) {
         composable(Screen.Login.route) { LoginScreen(
             onLoginSuccess = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
@@ -148,6 +165,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             }
         }
 
+
         // Placeholder untuk halaman Cart dan Profile
         composable(Screen.Cart.route) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -159,5 +177,26 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 Text(text = "Halaman Profil")
             }
         }
+
+        composable(route = "register") {
+            RegisterScreen(
+                onRegistrationSuccess = { navController.popBackStack() },
+                onNavigateBackToLogin = { navController.popBackStack() }
+            )
+        }
+        composable(route = "home") {
+            // 2. PASS NavController KE HomeScreen
+            HomeScreen(navController = navController)
+        }
+
+        // 3. TAMBAHKAN RUTE BARU UNTUK CHART
+        composable(route = "chart") {
+            ChartScreen(
+                // Di sini Anda bisa menambahkan parameter navigasi kembali jika perlu
+                // onBackClicked = { navController.popBackStack() }
+            )
+        }
+        // composable(route = "profile") { ProfileScreen() }
+
     }
 }
