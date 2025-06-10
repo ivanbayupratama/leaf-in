@@ -1,6 +1,6 @@
 // path: com/proyek/leaf_in/chart/ChartViewModel.kt
 
-package com.proyek.leaf_in.chart
+package com.proyek.leaf_in.cart
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ChartViewModel @Inject constructor() : ViewModel() {
+class CartViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChartUiState())
     val uiState: StateFlow<ChartUiState> = _uiState.asStateFlow()
