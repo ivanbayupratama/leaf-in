@@ -1,4 +1,4 @@
-// path: com/proyek/leaf_in/chart/CartScreen.kt
+// path: com/proyek/leaf_in/cart/CartScreen.kt
 
 package com.proyek.leaf_in.cart
 
@@ -33,8 +33,8 @@ import com.proyek.leaf_in.R
 @Composable
 fun CartScreen(
     viewModel: CartViewModel = hiltViewModel(),
-     onBackClicked: () -> Unit,
-     onCheckoutClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onCheckoutClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val leafGreen = Color(0xFF89D133)
@@ -55,9 +55,7 @@ fun CartScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                // --- TAMBAHKAN BLOK INI UNTUK MENYEIMBANGKAN JUDUL ---
                 actions = {
-                    // Spacer dengan lebar sama seperti IconButton untuk menyeimbangkan layout
                     Spacer(modifier = Modifier.width(48.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -104,8 +102,9 @@ fun CartScreen(
                 total = uiState.total
             )
 
+            // --- PERUBAHAN DI SINI ---
             Button(
-                onClick = { /* TODO: Aksi checkout */ },
+                onClick = onCheckoutClicked, // <-- Sambungkan ke parameter
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
