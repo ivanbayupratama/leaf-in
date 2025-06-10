@@ -1,4 +1,4 @@
-package com.proyek.leaf_in.chart
+package com.proyek.leaf_in.cart
 
 // Data class untuk satu item di dalam keranjang
 data class CartItem(

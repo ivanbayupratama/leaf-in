@@ -1,6 +1,6 @@
-// path: com/proyek/leaf_in/chart/ChartScreen.kt
+// path: com/proyek/leaf_in/chart/CartScreen.kt
 
-package com.proyek.leaf_in.chart
+package com.proyek.leaf_in.cart
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,11 +31,10 @@ import com.proyek.leaf_in.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChartScreen(
-    viewModel: ChartViewModel = hiltViewModel(),
-    // onBackClicked: () -> Unit,
-    // onCloseClicked: () -> Unit,
-    // onCheckoutClicked: () -> Unit
+fun CartScreen(
+    viewModel: CartViewModel = hiltViewModel(),
+     onBackClicked: () -> Unit,
+     onCheckoutClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val leafGreen = Color(0xFF89D133)
@@ -52,7 +51,7 @@ fun ChartScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Aksi tombol kembali */ }) {
+                    IconButton(onClick = onBackClicked) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
