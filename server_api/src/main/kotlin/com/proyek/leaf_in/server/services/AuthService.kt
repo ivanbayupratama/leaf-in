@@ -1,8 +1,9 @@
 package com.proyek.leaf_in.server.services
 
 import at.favre.lib.crypto.bcrypt.BCrypt
-import com.proyek.leaf_in.server.data.model.AuthRequest
 import com.proyek.leaf_in.server.data.model.AuthResponse
+import com.proyek.leaf_in.server.data.model.LoginRequest
+import com.proyek.leaf_in.server.data.model.RegisterRequest
 import com.proyek.leaf_in.server.data.model.Users
 import org.example.com.proyek.leaf_in.server.data.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.insert
@@ -11,7 +12,7 @@ import java.util.*
 
 class AuthService {
 
-    suspend fun registerUser(request: AuthRequest): AuthResponse {
+    suspend fun registerUser(request: RegisterRequest): AuthResponse {
         // Cek dulu apakah email sudah terdaftar
         val user = dbQuery {
             Users.select { Users.email eq request.email }.singleOrNull()
@@ -28,7 +29,7 @@ class AuthService {
         dbQuery {
             Users.insert {
                 it[id] = "user-${UUID.randomUUID()}"
-                it[fullName] = request.fullName ?: ""
+                it[fullName] = request.fullName
                 it[email] = request.email
                 it[password] = hashedPassword
             }
@@ -37,7 +38,7 @@ class AuthService {
         return AuthResponse(message = "Registrasi berhasil!", token = null)
     }
 
-    suspend fun loginUser(request: AuthRequest): AuthResponse {
+    suspend fun loginUser(request: LoginRequest): AuthResponse {
         // Cari pengguna berdasarkan email
         val user = dbQuery {
             Users.select { Users.email eq request.email }.singleOrNull()
