@@ -15,3 +15,10 @@ val LeafGreen = Color(0xFF89D133)
 
 val DarkGrayOutline = Color(0xFFA9A9A9) // Border dan label saat focused (contoh warna abu-abu gelap)
 val LightGrayOutline = Color(0xFFD3D3D3) // Border dan label saat unfocused (contoh warna abu-abu terang)
+
+
+// Warna Kustom untuk aplikasi Leaf-in (ini harus ada)
+val MintGreen = Color(0xFF91DDCF) // Untuk TopAppBar dan wave background
+
+// Warna Latar Belakang Kustom
+val LightBackground = Color(0xFFF5F5F5) // Ini untuk background abu-abu muda
