@@ -28,6 +28,8 @@ class HomeViewModel @Inject constructor(
     init {
         // Ini adalah bagian yang mengumpulkan Flow dari Repository
         // dan memperbarui UI State setiap kali ada data baru dari Room.
+        observeLocalProducts()
+        refreshHomeData()
         viewModelScope.launch(ioDispatcher) {
             menuRepository.getAllProducts().collectLatest { menuItems -> // <<< Kunci perbaikan ada di sini
                 _uiState.update { currentState ->
@@ -43,8 +45,29 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
+
         // Panggil refresh untuk mengambil data terbaru dari API saat ViewModel pertama kali dibuat.
         refreshHomeData()
+    }
+    private fun observeLocalProducts() {
+        viewModelScope.launch(ioDispatcher) {
+            // Flow ini akan terus berjalan dan otomatis memperbarui UI setiap kali
+            // data di dalam Room (database) berubah.
+            menuRepository.getAllProducts().collect { menuItems ->
+                _uiState.update { currentState ->
+                    // Filter data berdasarkan kategori yang diterima dari API
+                    val meals = menuItems.filter { it.category.equals("Meals", ignoreCase = true) }
+                    val beverages = menuItems.filter { it.category.equals("Beverages", ignoreCase = true) }
+
+                    currentState.copy(
+                        // isLoading diatur ke false di sini karena kita sudah menerima data (baik lama maupun baru)
+                        isLoading = false,
+                        meals = meals,
+                        beverages = beverages
+                    )
+                }
+            }
+        }
     }
 
     // Fungsi untuk memuat/refresh data Home dari API
