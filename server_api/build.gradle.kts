@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.0.0"
     id("io.ktor.plugin") version "2.3.12"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
 }
@@ -22,6 +22,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.41.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
     implementation("com.mysql:mysql-connector-j:8.0.33")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("org.slf4j:slf4j-simple:2.0.13")
     implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
@@ -31,5 +32,5 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(23)
+    jvmToolchain(21)
 }

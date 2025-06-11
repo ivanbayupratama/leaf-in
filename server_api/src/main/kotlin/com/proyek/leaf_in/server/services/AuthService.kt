@@ -5,7 +5,7 @@ import com.proyek.leaf_in.server.data.model.AuthResponse
 import com.proyek.leaf_in.server.data.model.LoginRequest
 import com.proyek.leaf_in.server.data.model.RegisterRequest
 import com.proyek.leaf_in.server.data.model.Users
-import org.example.com.proyek.leaf_in.server.data.DatabaseFactory.dbQuery
+import com.proyek.leaf_in.server.data.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import java.util.*
@@ -14,6 +14,9 @@ class AuthService {
 
     suspend fun registerUser(request: RegisterRequest): AuthResponse {
         // Cek dulu apakah email sudah terdaftar
+        if (request.password != request.confirmPassword) {
+            return AuthResponse(message = "Password dan konfirmasi password tidak cocok", token = null)
+        }
         val user = dbQuery {
             Users.select { Users.email eq request.email }.singleOrNull()
         }

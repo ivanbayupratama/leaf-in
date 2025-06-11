@@ -1,4 +1,4 @@
-package org.example.com.proyek.leaf_in.server.data
+package com.proyek.leaf_in.server.data
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -10,7 +10,7 @@ object DatabaseFactory {
     fun init() {
         // Konfigurasi koneksi ke database Anda
         val driverClassName = "com.mysql.cj.jdbc.Driver"
-        val jdbcURL = "jdbc:mysql://localhost:3306/leaf-in"
+        val jdbcURL = "jdbc:mysql://localhost:3306/db_leafin"
         val user = "root"
         val password = ""
 

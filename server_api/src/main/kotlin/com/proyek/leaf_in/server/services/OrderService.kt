@@ -1,7 +1,7 @@
 package com.proyek.leaf_in.server.services
 
+import com.proyek.leaf_in.server.data.DatabaseFactory.dbQuery
 import com.proyek.leaf_in.server.data.model.*
-import org.example.com.proyek.leaf_in.server.data.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
