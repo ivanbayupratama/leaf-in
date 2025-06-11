@@ -30,6 +30,8 @@ import com.proyek.leaf_in.auth.login.LoginScreen
 import com.proyek.leaf_in.auth.register.RegisterScreen
 import com.proyek.leaf_in.beverages.BeverageScreen
 import com.proyek.leaf_in.cart.CartScreen
+// --- 1. IMPORT CheckoutScreen ---
+import com.proyek.leaf_in.checkout.CheckoutScreen
 import com.proyek.leaf_in.home.HomeScreen
 import com.proyek.leaf_in.meals.MealsScreen
 import com.proyek.leaf_in.navigation.Screen
@@ -58,7 +60,7 @@ class MainActivity : ComponentActivity() {
                     "product_details" // Detail produk juga bisa punya bottom nav
                 )
 
-                // Logika untuk menampilkan bottom bar, sudah menangani rute dinamis seperti "product_list/meals"
+                // Logika untuk menampilkan bottom bar, sudah menangani rute dinamis
                 val shouldShowBottomBar = bottomNavRoutes.any { navRoute ->
                     currentRoute?.startsWith(navRoute.removeSuffix("/{category}")) == true
                 }
@@ -155,7 +157,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             arguments = listOf(navArgument("category") { type = NavType.StringType })
         ) { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
-            // Logika untuk menampilkan layar yang sesuai berdasarkan kategori
+
             when (category) {
                 "meals" -> MealsScreen(navController = navController)
                 "beverages" -> BeverageScreen(navController = navController)
@@ -165,7 +167,8 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         composable(Screen.Cart.route) {
             CartScreen(
                 onBackClicked = { navController.popBackStack() },
-                onCheckoutClicked = { /* TODO: Navigasi ke halaman checkout */ }
+                // --- 2. PERBARUI NAVIGASI CHECKOUT ---
+                onCheckoutClicked = { navController.navigate("checkout") }
             )
         }
 
@@ -175,9 +178,21 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             }
         }
 
-        // Rute untuk ProductDetailsScreen yang sebelumnya hilang, sekarang ditambahkan
         composable(route = "product_details") {
             ProductDetailsScreen()
+        }
+
+        // --- 3. TAMBAHKAN RUTE BARU UNTUK CHECKOUT ---
+        composable(route = "checkout") {
+            CheckoutScreen(
+                onBackClicked = { navController.popBackStack() },
+                onOrderPlaced = {
+                    // Kembali ke home dan hapus semua halaman di atasnya
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
