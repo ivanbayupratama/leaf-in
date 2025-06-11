@@ -28,7 +28,7 @@ object NetworkModule {
         // PENTING: 10.0.2.2 adalah alamat khusus dari emulator Android
         // untuk mengakses localhost di komputer/laptop.
         return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // Sesuaikan port jika Tim Backend pakai port lain
+            .baseUrl("http://192.168.18.35:8080/")// Sesuaikan port jika Tim Backend pakai port lain
             .addConverterFactory(GsonConverterFactory.create())
             .client(client) // Tambahkan client dengan logging interceptor
             .build()

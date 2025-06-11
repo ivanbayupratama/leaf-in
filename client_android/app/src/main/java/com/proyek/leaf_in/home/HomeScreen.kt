@@ -31,6 +31,7 @@ import com.proyek.leaf_in.data.model.MenuItem
 import com.proyek.leaf_in.navigation.Screen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import java.util.Locale
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun HomeScreen(
@@ -186,6 +187,9 @@ fun MenuItemCard(
     modifier: Modifier = Modifier,
     onCardClicked: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val imageResId = item.getDrawableResourceId(context)
+
     Card(
         onClick = onCardClicked,
         shape = RoundedCornerShape(26.dp),
@@ -195,7 +199,7 @@ fun MenuItemCard(
     ) {
         Column {
             Image(
-                painter = rememberAsyncImagePainter(model = item.imageUrl),
+                painter = painterResource(id = imageResId),
                 contentDescription = item.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

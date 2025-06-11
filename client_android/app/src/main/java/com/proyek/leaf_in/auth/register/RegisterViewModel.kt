@@ -3,7 +3,7 @@ package com.proyek.leaf_in.auth.register
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.proyek.leaf_in.data.model.AuthRequest
+import com.proyek.leaf_in.data.model.RegisterRequest
 import com.proyek.leaf_in.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -67,10 +67,11 @@ class RegisterViewModel @Inject constructor(
             // 3. Panggil API Registrasi
             try {
                 // PERBAIKI INI: Gunakan named parameters untuk AuthRequest karena fullName opsional
-                val request = AuthRequest(
+                val request = RegisterRequest(
                     fullName = currentState.fullName,
                     email = currentState.email,
-                    password = currentState.password
+                    password = currentState.password,
+                    confirmPassword = currentState.confirmPassword
                 )
                 val response = authRepository.registerUser(request)
 

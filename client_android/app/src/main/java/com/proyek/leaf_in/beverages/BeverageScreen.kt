@@ -131,7 +131,7 @@ fun MenuItemCard(
     ) {
         Column {
             Image(
-                painter = rememberAsyncImagePainter(model = item.imageUrl),
+                painter = rememberAsyncImagePainter(model = item.imageResName),
                 contentDescription = item.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

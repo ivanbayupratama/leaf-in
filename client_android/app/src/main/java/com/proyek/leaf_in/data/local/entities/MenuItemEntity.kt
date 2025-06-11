@@ -8,7 +8,7 @@ import com.proyek.leaf_in.data.model.MenuItem // Import MenuItem dari model API 
 data class MenuItemEntity(
     @PrimaryKey val id: String, // ID unik untuk setiap item, sesuaikan dengan ID dari API
     val name: String,
-    val imageUrl: String?, // Bisa null
+    val imageResName: String?, // Bisa null
     val price: Double,
     val category: String
     // Tambahkan properti lain yang relevan dari MenuItem Anda
@@ -18,7 +18,7 @@ data class MenuItemEntity(
         return MenuItem(
             id = this.id,
             name = this.name,
-            imageUrl = this.imageUrl,
+            imageResName = this.imageResName,
             price = this.price,
             category = this.category
         )
@@ -30,7 +30,7 @@ data class MenuItemEntity(
             return MenuItemEntity(
                 id = menuItem.id,
                 name = menuItem.name,
-                imageUrl = menuItem.imageUrl,
+                imageResName = menuItem.imageResName,
                 price = menuItem.price,
                 category = menuItem.category
             )

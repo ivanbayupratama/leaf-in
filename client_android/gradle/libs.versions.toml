@@ -15,6 +15,7 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 retrofit = "2.11.0"
+datastoreCoreAndroid = "1.1.7"
 
 [libraries]
 # AndroidX Core & Lifecycle
@@ -52,6 +53,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 debug-androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 debug-androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

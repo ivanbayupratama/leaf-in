@@ -2,7 +2,7 @@ package com.proyek.leaf_in.auth.login // Atau package presentation.auth Anda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.proyek.leaf_in.data.model.AuthRequest
+import com.proyek.leaf_in.data.model.LoginRequest
 import com.proyek.leaf_in.data.model.AuthResponse
 import com.proyek.leaf_in.data.repository.AuthRepository
 import com.proyek.leaf_in.data.local.UserPreferencesRepository
@@ -35,7 +35,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, loginError = null) }
             try {
-                val request = AuthRequest(
+                val request = LoginRequest(
                     email = _uiState.value.email,
                     password = _uiState.value.password
                 )
