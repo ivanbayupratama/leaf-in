@@ -14,4 +14,8 @@ sealed class Screen(val route: String) {
     object ProductList : Screen("product_list/{category}") {
         fun createRoute(category: String) = "product_list/$category"
     }
+
+    // Rute opsional untuk halaman lain jika ada
+    object ProductDetails : Screen("product_details") // Contoh
+    object Checkout : Screen("checkout") // Contoh
 }

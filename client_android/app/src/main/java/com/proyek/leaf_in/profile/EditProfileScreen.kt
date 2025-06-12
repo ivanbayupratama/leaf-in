@@ -96,7 +96,7 @@ fun EditProfileScreen(
                 },
                 // Kode ini sudah benar dan harusnya tidak menyebabkan error @Composable invocations
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MintGreen, // Menggunakan MintGreen (harus sudah diimpor dan didefinisikan)
+                    containerColor = Color(0xFF89D133),
                     titleContentColor = Color.Black // Menggunakan Color.Black (dari androidx.compose.ui.graphics.Color)
                 )
             )

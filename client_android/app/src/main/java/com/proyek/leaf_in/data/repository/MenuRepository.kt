@@ -33,6 +33,9 @@ class MenuRepository @Inject constructor(
             val apiMenuItems = apiService.getAllProducts()
             val entitiesToInsert = apiMenuItems.map { MenuItemEntity.fromMenuItem(it) }
             menuItemDao.insertMenuItems(entitiesToInsert) // Simpan ke Room
+            val entities = apiMenuItems.map { MenuItemEntity.fromMenuItem(it) }
+            menuItemDao.deleteAllMenuItems()
+            menuItemDao.insertMenuItems(entities)
         } catch (e: Exception) {
             // Tangani error (misalnya, tidak ada koneksi internet saat refresh)
             // Penting untuk melempar error agar ViewModel bisa menanganinya dan menampilkan pesan ke UI.

@@ -14,25 +14,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.proyek.leaf_in.R
 import com.proyek.leaf_in.data.model.MenuItem
 import com.proyek.leaf_in.navigation.Screen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
+import com.proyek.leaf_in.utils.findDrawableResourceId
 import java.util.Locale
-import androidx.compose.ui.platform.LocalContext
 
+/**
+ * Composable "pintar" yang terhubung ke ViewModel.
+ * Karena ViewModel sekarang memuat data statis secara otomatis saat dibuat,
+ * Composable ini tidak perlu lagi memicu pengambilan data.
+ */
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -40,39 +43,36 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Memanggil Composable "bodoh" yang hanya fokus menggambar UI
+    // Blok LaunchedEffect telah dihapus karena ViewModel tidak lagi
+    // memiliki fungsi refreshDataFromApi() dan sudah otomatis memuat data dummy.
+
     HomeScreenContent(
         uiState = uiState,
         onShowAllClicked = { category ->
-            // Logika navigasi saat tombol "Show All" diklik
             navController.navigate(Screen.ProductList.createRoute(category))
         },
         onProductCardClicked = { menuItemId ->
-            // ==========================================================
-            // --- PERUBAHAN 1: Tambahkan aksi navigasi di sini ---
-            // ==========================================================
-            // Di masa depan, Anda bisa menggunakan menuItemId untuk mengirim data
-            // ke halaman detail, contoh: "product_details/$menuItemId"
+            // TODO: Kirim ID produk ke halaman detail saat sudah siap
             navController.navigate("product_details")
         }
     )
 }
 
-// =====================================================================================
-// BAGIAN 2: FUNGSI "BODOH" YANG HANYA MENGGAMBAR TAMPILAN
-// =====================================================================================
+/**
+ * Composable "bodoh" yang hanya bertanggung jawab untuk menampilkan UI
+ * berdasarkan state yang diberikan. Tidak mengandung logika.
+ */
 @Composable
 fun HomeScreenContent(
     uiState: HomeUiState,
     onShowAllClicked: (category: String) -> Unit,
     onProductCardClicked: (menuItemId: String) -> Unit
 ) {
-    // Column utama yang bisa di-scroll
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(Color(0xFFF0F0F0)) // Warna background abu-abu
+            .background(Color(0xFFF0F0F0))
             .padding(bottom = 16.dp)
     ) {
         // --- Bagian Header ---
@@ -105,20 +105,19 @@ fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Logika Tampilan Konten ---
+        // --- Logika Tampilan Konten Utama ---
         when {
             uiState.isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 64.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
             uiState.errorMessage != null -> {
-                Text(
-                    text = "Error: ${uiState.errorMessage}",
-                    color = Color.Red,
-                    modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
-                )
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 64.dp), contentAlignment = Alignment.Center) {
+                    Text(text = "Error: ${uiState.errorMessage}", color = Color.Red, style = MaterialTheme.typography.bodyLarge)
+                }
             }
             else -> {
-                // --- Bagian Meals ---
                 MenuSection(
                     title = "Meals",
                     items = uiState.meals,
@@ -126,8 +125,6 @@ fun HomeScreenContent(
                     onProductCardClicked = onProductCardClicked
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // --- Bagian Beverages ---
                 MenuSection(
                     title = "Beverages",
                     items = uiState.beverages,
@@ -139,9 +136,9 @@ fun HomeScreenContent(
     }
 }
 
-// =====================================================================================
-// BAGIAN 3: KOMPONEN-KOMPONEN KECIL YANG DIPAKAI ULANG
-// =====================================================================================
+/**
+ * Komponen reusable untuk menampilkan satu section menu (misal: Meals).
+ */
 @Composable
 fun MenuSection(
     title: String,
@@ -150,36 +147,43 @@ fun MenuSection(
     onProductCardClicked: (String) -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
+        Text(text = title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         TextButton(onClick = onShowAllClicked) {
-            Text(text = "Show All", color = Color(0xFFED1A1A))
+            Text(text = "Show All", color = Color.Red)
         }
     }
     Spacer(modifier = Modifier.height(16.dp))
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(items) { item ->
-            MenuItemCard(
-                item = item,
-                onCardClicked = { onProductCardClicked(item.id) }
-            )
+
+    if (items.isEmpty() && title.isNotEmpty()) { // Ditambah cek title agar tidak tampil di preview
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(100.dp)
+                .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Tidak ada produk untuk kategori '$title'", color = Color.Gray)
+        }
+    } else {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(items, key = { it.id }) { item ->
+                MenuItemCard(
+                    item = item,
+                    onCardClicked = { onProductCardClicked(item.id) }
+                )
+            }
         }
     }
 }
 
+/**
+ * Komponen reusable untuk menampilkan satu kartu produk.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuItemCard(
@@ -188,83 +192,58 @@ fun MenuItemCard(
     onCardClicked: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val imageResId = item.getDrawableResourceId(context)
+    val imageResId = item.findDrawableResourceId(context)
 
     Card(
         onClick = onCardClicked,
-        shape = RoundedCornerShape(26.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = modifier.width(180.dp)
+        modifier = modifier.width(160.dp)
     ) {
         Column {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = item.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF89D133), shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
-                    .padding(12.dp),
-            ) {
-                Text(
-                    text = item.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    maxLines = 1
+            if (imageResId != 0) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = item.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth().height(110.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Rp. ${String.format(Locale("id", "ID"), "%,.0f", item.price)}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(110.dp).background(Color.LightGray.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Button(
-                        onClick = { /* TODO: Add to cart */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        modifier = Modifier.height(36.dp)
-                    ) {
-                        Text(text = "Order", color = Color(0xFF173006), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                    // ==========================================================
-                    // --- PERUBAHAN 2: Isi onClick dengan onCardClicked ---
-                    // ==========================================================
-                    IconButton(onClick = onCardClicked) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.desc_product),
-                            contentDescription = "More options",
-                            tint = Color(0xFF173006)
-                        )
-                    }
+                    Icon(painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "No image available", tint = Color.Gray)
+                }
+            }
+
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(text = item.name, fontWeight = FontWeight.Bold, maxLines = 1, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Rp. ${String.format(Locale("id", "ID"), "%,.0f", item.price)}", color = Color(0xFF89D133), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { /* TODO: Add to cart */ },
+                    modifier = Modifier.fillMaxWidth().height(36.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF89D133))
+                ) {
+                    Text("Order", color = Color.White, fontSize = 12.sp)
                 }
             }
         }
     }
 }
 
-// =====================================================================================
-// BAGIAN 4: FUNGSI PREVIEW UNTUK MEMBANTU DEVELOPMENT
-// =====================================================================================
-@Preview(showBackground = true)
+/**
+ * Fungsi Preview untuk development UI secara terisolasi.
+ */
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 fun HomeScreenContentPreview() {
-    val dummyMeals = listOf(MenuItem("1", "Toast", "url", 25000.0, "Meals"), MenuItem("2", "Bubur Ayam", "url", 15000.0, "Meals"))
-    val dummyBeverages = listOf(MenuItem("4", "Smoothies", "url", 25000.0, "Beverages"), MenuItem("6", "Green Tea", "url", 12000.0, "Beverages"))
+    val dummyMeals = listOf(MenuItem("1", "Toast", "Meals", 25000.0, "toast"))
+    val dummyBeverages = listOf(MenuItem("4", "Green Tea", "Beverages", 12000.0, "green_tea"))
     val dummyState = HomeUiState(meals = dummyMeals, beverages = dummyBeverages)
 
     Leaf_inTheme {
@@ -273,5 +252,13 @@ fun HomeScreenContentPreview() {
             onShowAllClicked = {},
             onProductCardClicked = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MenuSectionEmptyPreview() {
+    Leaf_inTheme {
+        MenuSection(title = "Meals", items = emptyList(), onShowAllClicked = {}, onProductCardClicked = {})
     }
 }

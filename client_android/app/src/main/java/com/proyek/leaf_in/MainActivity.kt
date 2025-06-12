@@ -3,39 +3,22 @@ package com.proyek.leaf_in
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.proyek.leaf_in.auth.login.LoginScreen
-import com.proyek.leaf_in.auth.register.RegisterScreen
-import com.proyek.leaf_in.beverages.BeverageScreen
-import com.proyek.leaf_in.cart.CartScreen
-// --- 1. IMPORT CheckoutScreen ---
-import com.proyek.leaf_in.checkout.CheckoutScreen
-import com.proyek.leaf_in.home.HomeScreen
-import com.proyek.leaf_in.meals.MealsScreen
+import com.proyek.leaf_in.navigation.AppNavHost // <-- PASTIKAN IMPORT INI ADA
 import com.proyek.leaf_in.navigation.Screen
-import com.proyek.leaf_in.productdetails.ProductDetailsScreen
 import com.proyek.leaf_in.ui.theme.Leaf_inTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -51,16 +34,14 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
-                // Daftar rute yang akan menampilkan Bottom Navigation Bar
                 val bottomNavRoutes = setOf(
                     Screen.Home.route,
                     Screen.Cart.route,
                     Screen.Profile.route,
                     Screen.ProductList.route,
-                    "product_details" // Detail produk juga bisa punya bottom nav
+                    Screen.ProductDetails.route
                 )
 
-                // Logika untuk menampilkan bottom bar, sudah menangani rute dinamis
                 val shouldShowBottomBar = bottomNavRoutes.any { navRoute ->
                     currentRoute?.startsWith(navRoute.removeSuffix("/{category}")) == true
                 }
@@ -74,7 +55,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    // AppNavHost sebagai "peta" utama aplikasi
+                    // Memanggil AppNavHost dari file navigation/AppNavHost.kt
                     AppNavHost(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding)
@@ -90,9 +71,7 @@ fun AppBottomNavigation(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    NavigationBar(
-        containerColor = Color(0xFF89D133)
-    ) {
+    NavigationBar(containerColor = Color(0xFF89D133)) {
         val bottomNavItems = listOf(
             Triple(Screen.Home, R.drawable.home_button, "Home"),
             Triple(Screen.Cart, R.drawable.cart_button, "Cart"),
@@ -122,76 +101,6 @@ fun AppBottomNavigation(navController: NavHostController) {
                     selectedIconColor = Color.Black,
                     unselectedIconColor = Color.Black.copy(alpha = 0.6f)
                 )
-            )
-        }
-    }
-}
-
-@Composable
-fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Login.route,
-        modifier = modifier
-    ) {
-        composable(Screen.Login.route) {
-            LoginScreen(
-                onLoginSuccess = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
-                onNavigateToRegister = { navController.navigate(Screen.Register.route) }
-            )
-        }
-
-        composable(Screen.Register.route) {
-            RegisterScreen(
-                onRegistrationSuccess = { navController.popBackStack() },
-                onNavigateBackToLogin = { navController.popBackStack() }
-            )
-        }
-
-        composable(Screen.Home.route) {
-            HomeScreen(navController = navController)
-        }
-
-        composable(
-            route = Screen.ProductList.route,
-            arguments = listOf(navArgument("category") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val category = backStackEntry.arguments?.getString("category")
-
-            when (category) {
-                "meals" -> MealsScreen(navController = navController)
-                "beverages" -> BeverageScreen(navController = navController)
-            }
-        }
-
-        composable(Screen.Cart.route) {
-            CartScreen(
-                onBackClicked = { navController.popBackStack() },
-                // --- 2. PERBARUI NAVIGASI CHECKOUT ---
-                onCheckoutClicked = { navController.navigate("checkout") }
-            )
-        }
-
-        composable(Screen.Profile.route) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Halaman Profil")
-            }
-        }
-
-        composable(route = "product_details") {
-            ProductDetailsScreen()
-        }
-
-        // --- 3. TAMBAHKAN RUTE BARU UNTUK CHECKOUT ---
-        composable(route = "checkout") {
-            CheckoutScreen(
-                onBackClicked = { navController.popBackStack() },
-                onOrderPlaced = {
-                    // Kembali ke home dan hapus semua halaman di atasnya
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
-                }
             )
         }
     }
